@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI & DS Lab — All Experiments</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg: #0d0f12;
+    --surface: #151820;
+    --border: #222631;
+    --accent: #4fffb0;
+    --accent2: #4fc3ff;
+    --text: #e8eaf0;
+    --muted: #7a8099;
+    --code-bg: #0a0c10;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    padding: 40px 40px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+  }
+
+  .logo {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--accent); }
+
+  .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+
+  /* LAYOUT */
+  .container {
+    display: flex;
+    height: calc(100vh - 81px);
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 20px 0;
+  }
+
+  .sidebar-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0 20px 12px;
+  }
+
+  .exp-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s;
+    border-left: 3px solid transparent;
+  }
+
+  .exp-btn:hover {
+    background: var(--surface);
+  }
+
+  .exp-btn.active {
+    background: var(--surface);
+    border-left-color: var(--accent);
+  }
+
+  .exp-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    min-width: 24px;
+  }
+
+  .exp-label {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .exp-btn.active .exp-label { color: var(--accent); }
+
+  /* MAIN CONTENT */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 30px 40px;
+  }
+
+  .exp-section { display: none; }
+  .exp-section.active { display: block; }
+
+  .exp-header {
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .exp-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .exp-title {
+    font-size: 26px;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+
+  .exp-desc {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* CODE BLOCK */
+  .code-section { margin-bottom: 28px; }
+
+  .code-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .code-label::before {
+    content: '';
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--accent2);
+    border-radius: 50%;
+  }
+
+  .code-wrapper {
+    position: relative;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .code-topbar {
+    background: var(--surface);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dots { display: flex; gap: 6px; }
+  .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .dot.r { background: #ff5f57; }
+  .dot.y { background: #febc2e; }
+  .dot.g { background: #28c840; }
+
+  .copy-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    background: var(--border);
+    color: var(--muted);
+    border: none;
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { background: var(--accent); color: #000; }
+  .copy-btn.copied { background: var(--accent); color: #000; }
+
+  pre {
+    background: var(--code-bg);
+    padding: 20px;
+    overflow-x: auto;
+    margin: 0;
+  }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #abb2bf;
+  }
+
+  /* Syntax highlighting */
+  .kw  { color: #c678dd; }
+  .fn  { color: #61afef; }
+  .st  { color: #98c379; }
+  .cm  { color: #5c6370; font-style: italic; }
+  .nm  { color: #e5c07b; }
+  .op  { color: #56b6c2; }
+
+  /* NOTE BOX */
+  .note-box {
+    background: #0e1a14;
+    border: 1px solid #1d3a28;
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: #7fcca0;
+    line-height: 1.6;
+  }
+
+  .note-box strong { color: var(--accent); }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  /* MOBILE */
+  @media (max-width: 700px) {
+    .container { flex-direction: column; height: auto; }
+    .sidebar { width: 100%; min-width: unset; border-right: none; border-bottom: 1px solid var(--border); overflow-x: auto; display: flex; padding: 10px; gap: 6px; }
+    .exp-btn { min-width: 100px; border-left: none; border-bottom: 3px solid transparent; flex-direction: column; align-items: flex-start; padding: 10px; border-radius: 8px; }
+    .exp-btn.active { border-left-color: transparent; border-bottom-color: var(--accent); background: var(--surface); }
+    .sidebar-title { display: none; }
+    .main { padding: 20px; }
+    header { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">AI &amp; DS <span>Lab</span></div>
+  <div class="badge">insurance.csv · 10 Experiments</div>
+</header>
+
+<div class="container">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-title">Experiments</div>
+    <button class="exp-btn active" onclick="show(1, this)">
+      <span class="exp-num">01</span>
+      <span class="exp-label">Data Preparation</span>
+    </button>
+    <button class="exp-btn" onclick="show(2, this)">
+      <span class="exp-num">02</span>
+      <span class="exp-label">Data Visualization</span>
+    </button>
+    <button class="exp-btn" onclick="show(3, this)">
+      <span class="exp-num">03</span>
+      <span class="exp-label">Data Modelling</span>
+    </button>
+    <button class="exp-btn" onclick="show(4, this)">
+      <span class="exp-num">04</span>
+      <span class="exp-label">Hypothesis Testing</span>
+    </button>
+    <button class="exp-btn" onclick="show(5, this)">
+      <span class="exp-num">05</span>
+      <span class="exp-label">Regression Analysis</span>
+    </button>
+    <button class="exp-btn" onclick="show(6, this)">
+      <span class="exp-num">06</span>
+      <span class="exp-label">Classification</span>
+    </button>
+    <button class="exp-btn" onclick="show(7, this)">
+      <span class="exp-num">07</span>
+      <span class="exp-label">Clustering</span>
+    </button>
+    <button class="exp-btn" onclick="show(8, this)">
+      <span class="exp-num">08</span>
+      <span class="exp-label">Recommendation</span>
+    </button>
+    <button class="exp-btn" onclick="show(9, this)">
+      <span class="exp-num">09</span>
+      <span class="exp-label">Spark EDA</span>
+    </button>
+    <button class="exp-btn" onclick="show(10, this)">
+      <span class="exp-num">10</span>
+      <span class="exp-label">Batch &amp; Streaming</span>
+    </button>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- EXP 01 -->
+    <section class="exp-section active" id="exp1">
+      <div class="exp-header">
+        <div class="exp-tag">Experiment 01</div>
+        <div class="exp-title">Data Preparation using NumPy and Pandas</div>
+        <div class="exp-desc">Index derivation, missing value detection, standardization and outlier detection using Z-score.</div>
+      </div>
+      <div class="note-box"><strong>Run on:</strong> Google Colab · Upload <code>insurance.csv</code> first using <code>from google.colab import files; files.upload()</code></div>
+      <div class="code-section">
+        <div class="code-label">Full Code</div>
+        <div class="code-wrapper">
+          <div class="code-topbar">
+            <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code>import pandas as pd
+import numpy as np
+
+# Load dataset
+df = pd.read_csv('insurance.csv')
+
+print("="*50)
+print("ORIGINAL DATASET")
+print("="*50)
+print(df.head())
+print(f"\nShape: {df.shape}")
+
+# -----------------------------------------------
+# A. Derive an index field and add it to dataset
+# -----------------------------------------------
+print("\n" + "="*50)
+print("A. ADDING POLICY_ID INDEX")
+print("="*50)
+
+df['Policy_ID'] = np.arange(1001, 1001 + len(df))
+df.set_index('Policy_ID', inplace=True)
+
+print(df.head())
+
+# -----------------------------------------------
+# B. Find out the missing values
+# -----------------------------------------------
+print("\n" + "="*50)
+print("B. MISSING VALUES")
+print("="*50)
+
+print(df.isnull().sum())
+
+# -----------------------------------------------
+# C. Top 10 largest values in 'charges'
+# -----------------------------------------------
+print("\n" + "="*50)
+print("C. TOP 10 LARGEST CHARGES")
+print("="*50)
+
+top_10_charges = df['charges'].nlargest(10)
+print(top_10_charges)
+
+# -----------------------------------------------
+# D(i). Standardize the 'charges' variable
+# -----------------------------------------------
+print("\n" + "="*50)
+print("D(i). STANDARDIZED CHARGES (Z-SCORE)")
+print("="*50)
+
+mean_val = df['charges'].mean()
+std_val  = df['charges'].std()
+
+df['charges_zscore'] = (df['charges'] - mean_val) / std_val
+
+print(f"Mean   : {mean_val:.2f}")
+print(f"Std Dev: {std_val:.2f}")
+print("\nFirst 5 standardized values:")
+print(df[['charges', 'charges_zscore']].head())
+
+# -----------------------------------------------
+# D(ii). Identify outliers and most extreme one
+# -----------------------------------------------
+print("\n" + "="*50)
+print("D(ii). OUTLIERS (Z-SCORE > 3)")
+print("="*50)
+
+outliers = df[np.abs(df['charges_zscore']) > 3]
+num_outliers = len(outliers)
+
+most_extreme_idx    = df['charges_zscore'].abs().idxmax()
+most_extreme_record = df.loc[most_extreme_idx]
+
+print(f"Total Outliers Found : {num_outliers}")
+print("\n" + "-"*40)
+print("Most Extreme Outlier Details:")
+print("-"*40)
+print(most_extreme_record)
+
+print("\n" + "="*50)
+print("CONCLUSION: Data Preparation Complete!")
+print("="*50)</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXP 02 -->
+    <section class="exp-section" id="exp2">
+      <div class="exp-header">
+        <div class="exp-tag">Experiment 02</div>
+        <div class="exp-title">Data Visualization / EDA using Matplotlib and Seaborn</div>
+        <div class="exp-desc">Bar graph, contingency table, and normalized histogram for insurance dataset.</div>
+      </div>
+      <div class="note-box"><strong>Run on:</strong> Google Colab · All libraries pre-installed · No pip install needed</div>
+      <div class="code-section">
+        <div class="code-label">Full Code</div>
+        <div class="code-wrapper">
+          <div class="code-topbar">
+            <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code>import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load the data
+df = pd.read_csv('insurance.csv')
+
+print("Dataset Loaded Successfully!")
+print(f"Shape: {df.shape}")
+print(df.head())
+
+# -----------------------------------------------
+# A. Contingency Table (Region vs Smoker)
+# -----------------------------------------------
+print("\n" + "="*50)
+print("A. CONTINGENCY TABLE (Region vs Smoker)")
+print("="*50)
+
+contingency_tab = pd.crosstab(df['region'], df['smoker'])
+print("Contingency Table (Region vs Smoker):")
+print(contingency_tab)
+
+# -----------------------------------------------
+# A. Bar Graph Using Seaborn
+# -----------------------------------------------
+print("\n" + "="*50)
+print("A. BAR GRAPH - Distribution of Smokers by Region")
+print("="*50)
+
+plt.figure(figsize=(10, 6))
+sns.countplot(x='region', hue='smoker', data=df, palette='viridis')
+plt.title('Distribution of Smokers by Region')
+plt.xlabel('Region')
+plt.ylabel('Count')
+plt.legend(title='Smoker')
+plt.tight_layout()
+plt.show()
+
+# -----------------------------------------------
+# B. Normalized Histogram of BMI
+# -----------------------------------------------
+print("\n" + "="*50)
+print("B. NORMALIZED HISTOGRAM - BMI Distribution")
+print("="*50)
+
+plt.figure(figsize=(10, 6))
+sns.histplot(df['bmi'], bins=30, kde=True, stat="density", color='orange')
+plt.title('Normalized Distribution of BMI')
+plt.xlabel('BMI')
+plt.ylabel('Density')
+plt.tight_layout()
+plt.show()
+
+print("\n" + "="*50)
+print("CONCLUSION: EDA using Matplotlib and Seaborn Complete!")
+print("="*50)</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXP 03 -->
+    <section class="exp-section" id="exp3">
+      <div class="exp-header">
+        <div class="exp-tag">Experiment 03</div>
+        <div class="exp-title">Data Modelling Using Python</div>
+        <div class="exp-desc">75/25 train-test split with bar graph confirmation and two-sample Z-test validation.</div>
+      </div>
+      <div class="note-box"><strong>Install:</strong> <code>pip install statsmodels</code> before running in Colab</div>
+      <div class="code-section">
+        <div class="code-label">Full Code</div>
+        <div class="code-wrapper">
+          <div class="code-topbar">
+            <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code>import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from statsmodels.stats.weightstats import ztest
+
+# Load the dataset
+df = pd.read_csv('insurance.csv')
+
+print("="*50)
+print("DATASET LOADED")
+print("="*50)
+print(df.head())
+print(f"\nTotal Records: {len(df)}")
+
+# -----------------------------------------------
+# A. Partition the dataset (75% Train, 25% Test)
+# -----------------------------------------------
+print("\n" + "="*50)
+print("A. PARTITIONING DATASET (75% / 25%)")
+print("="*50)
+
+train_df, test_df = train_test_split(df, test_size=0.25, random_state=42)
+
+# -----------------------------------------------
+# B. Identify total records in each set
+# -----------------------------------------------
+print("\n" + "="*50)
+print("B. RECORD COUNT")
+print("="*50)
+
+train_count = len(train_df)
+test_count  = len(test_df)
+
+print(f"Total number of records in the Training Data Set: {train_count}")
+print(f"Total number of records in the Testing Data Set : {test_count}")
+
+# Bar Graph to confirm proportions
+labels   = ['Training Set', 'Testing Set']
+counts   = [train_count, test_count]
+colors   = ['steelblue', 'lightcoral']
+percents = [train_count/len(df)*100, test_count/len(df)*100]
+
+plt.figure(figsize=(8, 6))
+bars = plt.bar(labels, counts, color=colors, edgecolor='black', width=0.4)
+
+for bar, count, pct in zip(bars, counts, percents):
+    plt.text(bar.get_x() + bar.get_width()/2,
+             bar.get_height() + 10,
+             f'{count} ({pct:.1f}%)',
+             ha='center', va='bottom', fontweight='bold', fontsize=12)
+
+plt.title('Distribution of Records: Training vs Testing Set', fontsize=14)
+plt.ylabel('Number of Records')
+plt.ylim(0, max(counts) + 150)
+plt.tight_layout()
+plt.show()
+
+# -----------------------------------------------
+# C. Validate partition using Two-Sample Z-Test
+# -----------------------------------------------
+print("\n" + "="*50)
+print("C. TWO-SAMPLE Z-TEST VALIDATION (on 'bmi' column)")
+print("="*50)
+
+z_stat, p_val = ztest(train_df['bmi'], test_df['bmi'])
+
+print(f"\n--- Two-Sample Z-Test Validation (on 'bmi' column) ---")
+print(f"Z-statistic : {z_stat:.4f}")
+print(f"P-value     : {p_val:.4f}")
+
+if p_val > 0.05:
+    print("\nConclusion: Fail to reject the null hypothesis.")
+    print("The training and test sets are statistically similar.")
+else:
+    print("\nConclusion: Reject the null hypothesis.")
+    print("There is a significant difference between the partitions.")
+
+print("\n" + "="*50)
+print("CONCLUSION: Data Modelling using Python Complete!")
+print("="*50)</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXP 04 -->
+    <section class="exp-section" id="exp4">
+      <div class="exp-header">
+        <div class="exp-tag">Experiment 04</div>
+        <div class="exp-title">Statistical Hypothesis Testing using Scipy</div>
+        <div class="exp-desc">Shapiro-Wilk, D'Agostino K², and Anderson-Darling normality tests on BMI column.</div>
+      </div>
+      <div class="note-box"><strong>Run on:</strong> Google Colab · scipy is pre-installed · No extra installs needed</div>
+      <div class="code-section">
+        <div class="code-label">Full Code</div>
+        <div class="code-wrapper">
+          <div class="code-topbar">
+            <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code>import pandas as pd
+from scipy.stats import shapiro, normaltest, anderson
+
+# Load the dataset
+df = pd.read_csv('insurance.csv')
+data = df['bmi']
+
+print("="*50)
+print("NORMALITY TESTING FOR BMI")
+print("="*50)
+
+# -----------------------------------------------
+# A.1 Shapiro-Wilk Test
+# -----------------------------------------------
+print("\n" + "="*50)
+print("1. SHAPIRO-WILK TEST")
+print("="*50)
+
+stat_sw, p_sw = shapiro(data)
+print(f"Shapiro-Wilk Test: Statistics={stat_sw:.3f}, p-value={p_sw:.3f}")
+
+if p_sw > 0.05:
+    print("Result: Sample looks Gaussian (fail to reject H0)")
+else:
+    print("Result: Sample does not look Gaussian (reject H0)")
+
+# -----------------------------------------------
+# A.2 D'Agostino's K^2 Test
+# -----------------------------------------------
+print("\n" + "="*50)
+print("2. D'AGOSTINO'S K^2 TEST")
+print("="*50)
+
+stat_k2, p_k2 = normaltest(data)
+print(f"D'Agostino's K^2 Test: Statistics={stat_k2:.3f}, p-value={p_k2:.3f}")
+
+if p_k2 > 0.05:
+    print("Result: Sample looks Gaussian (fail to reject H0)")
+else:
+    print("Result: Sample does not look Gaussian (reject H0)")
+
+# -----------------------------------------------
+# A.3 Anderson-Darling Test
+# -----------------------------------------------
+print("\n" + "="*50)
+print("3. ANDERSON-DARLING TEST")
+print("="*50)
+
+result_ad = anderson(data)
+print(f"Anderson-Darling Test: Statistic={result_ad.statistic:.3f}")
+
+for i in range(len(result_ad.critical_values)):
+    sl, cv = result_ad.significance_level[i], result_ad.critical_values[i]
+    if result_ad.statistic < cv:
+        print(f"Result at {sl}% level: Sample looks Gaussian (Statistic < {cv})")
+    else:
+        print(f"Result at {sl}% level: Sample does not look Gaussian (Statistic > {cv})")
+
+print("\n" + "="*50)
+print("CONCLUSION: Statistical Hypothesis Test Complete!")
+print("="*50)</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXP 05 -->
+    <section class="exp-section" id="exp5">
+      <div class="exp-header">
+        <div class="exp-tag">Experiment 05</div>
+        <div class="exp-title">Regression Analysis</div>
+        <div class="exp-desc">Logistic Regression to predict smoker status and Linear Regression to predict insurance charges.</div>
+      </div>
+      <div class="note-box"><strong>Run on:</strong> Google Colab · sklearn is pre-installed · No extra installs needed</div>
+      <div class="code-section">
+        <div class="code-label">Full Code</div>
+        <div class="code-wrapper">
+          <div class="code-topbar">
+            <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code>import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression, LinearRegression
+from sklearn.metrics import classification_report, confusion_matrix, mean_squared_error, r2_score
+
+# Load the dataset
+df = pd.read_csv('insurance.csv')
+
+print("="*50)
+print("DATASET LOADED")
+print("="*50)
+print(df.head())
+print(f"\nShape: {df.shape}")
+
+# -----------------------------------------------
+# A. Logistic Regression
+#    Predict: Smoker (1) or Non-Smoker (0)
+#    Features: age, bmi, charges
+# -----------------------------------------------
+print("\n" + "="*50)
+print("A. LOGISTIC REGRESSION")
+print("   Predicting Smoker Status")
+print("="*50)
+
+# Encode 'smoker' column: yes=1, no=0
+df['smoker_binary'] = df['smoker'].map({'yes': 1, 'no': 0})
+
+# Select features and target
+X = df[['age', 'bmi', 'charges']]
+y = df['smoker_binary']
+
+# Split data 75% train, 25% test
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42
+)
+
+# Train Logistic Regression model
+log_reg = LogisticRegression()
+log_reg.fit(X_train, y_train)
+
+# Predict and Evaluate
+y_pred = log_reg.predict(X_test)
+
+print("\n--- Logistic Regression: Predicting Smoker Status ---")
+print("\nConfusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+
+# -----------------------------------------------
+# B. Linear Regression
+#    Predict: Insurance Charges (continuous value)
+#    Features: all columns except charges
+# -----------------------------------------------
+print("\n" + "="*50)
+print("B. LINEAR REGRESSION")
+print("   Predicting Insurance Charges")
+print("="*50)
+
+# Encode categorical columns (sex, region, smoker)
+df_encoded = pd.get_dummies(df, drop_first=True)
+
+# Target is 'charges', features are everything else
+X_linear = df_encoded.drop('charges', axis=1)
+y_linear = df_encoded['charges']
+
+# Split data
+X_train_l, X_test_l, y_train_l, y_test_l = train_test_split(
+    X_linear, y_linear, test_size=0.25, random_state=42
+)
+
+# Train Linear Regression model
+lin_reg = LinearRegression()
+lin_reg.fit(X_train_l, y_train_l)
+
+# Make Predictions
+y_pred_l = lin_reg.predict(X_test_l)
+
+# Evaluate
+print("\n--- Linear Regression: Predicting Insurance Charges ---")
+print(f"R-squared Score    : {r2_score(y_test_l, y_pred_l):.4f}")
+print(f"Mean Squared Error : {mean_squared_error(y_test_l, y_pred_l):.2f}")
+
+print("\n" + "="*50)
+print("CONCLUSION: Regression Analysis Complete!")
+print("="*50)</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXP 06 -->
+    <section class="exp-section" id="exp6">
+      <div class="exp-header">
+        <div class="exp-tag">Experiment 06</div>
+        <div class="exp-title">Classification using Random Forest</div>
+        <div class="exp-desc">Random Forest Classifier to predict smoker status with confusion matrix and classification report.</div>
+      </div>
+      <div class="note-box"><strong>Run on:</strong> Google Colab · All libraries pre-installed · No extra installs needed</div>
+      <div class="code-section">
+        <div class="code-label">Full Code</div>
+        <div class="code-wrapper">
+          <div class="code-topbar">
+            <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code>import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
+
+# Load the dataset
+df = pd.read_csv('insurance.csv')
+
+print("="*50)
+print("DATASET LOADED")
+print("="*50)
+print(df.head())
+print(f"\nShape: {df.shape}")
+
+# -----------------------------------------------
+# A. Choosing a Classifier
+#    Random Forest Classifier
+#    Predict: Smoker (1) or Non-Smoker (0)
+# -----------------------------------------------
+print("\n" + "="*50)
+print("A. RANDOM FOREST CLASSIFIER")
+print("="*50)
+
+# Preprocessing: Convert categorical text to numbers
+df['smoker'] = df['smoker'].map({'yes': 1, 'no': 0})
+df['sex']    = df['sex'].map({'female': 1, 'male': 0})
+
+# Features (X) and Target (y)
+X = df[['age', 'bmi', 'charges', 'sex', 'children']]
+y = df['smoker']
+
+# Split 75/25
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42
+)
+
+print(f"\nTraining samples : {len(X_train)}")
+print(f"Testing samples  : {len(X_test)}")
+
+# Initialize and Train
+classifier = RandomForestClassifier(n_estimators=100, random_state=42)
+classifier.fit(X_train, y_train)
+
+print("\nModel Training Complete!")
+
+# Predict
+y_pred = classifier.predict(X_test)
+
+# -----------------------------------------------
+# B. Evaluating the Performance
+#    Confusion Matrix + Classification Report
+# -----------------------------------------------
+print("\n" + "="*50)
+print("B. EVALUATING PERFORMANCE")
+print("="*50)
+
+cm     = confusion_matrix(y_test, y_pred)
+report = classification_report(y_test, y_pred)
+acc    = accuracy_score(y_test, y_pred)
+
+print(f"\nOverall Accuracy: {acc:.2%}")
+
+print("\nConfusion Matrix:")
+print(cm)
+print("\nTP = Correctly predicted Smokers    :", cm[1][1])
+print("TN = Correctly predicted Non-Smokers:", cm[0][0])
+print("FP = Non-Smokers labeled as Smokers :", cm[0][1])
+print("FN = Smokers labeled as Non-Smokers :", cm[1][0])
+
+print("\nDetailed Classification Report:")
+print(report)
+
+print("="*50)
+print("CONCLUSION: Classification Modelling Complete!")
+print("="*50)</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXP 07 -->
+    <section class="exp-section" id="exp7">
+      <div class="exp-header">
+        <div class="exp-tag">Experiment 07</div>
+        <div class="exp-title">Clustering using K-Means</div>
+        <div class="exp-desc">K-Means clustering on Age vs Charges to find risk groups, with scatter plot visualization.</div>
+      </div>
+      <div class="note-box"><strong>Run on:</strong> Google Colab · All libraries pre-installed · No extra installs needed</div>
+      <div class="code-section">
+        <div class="code-label">Full Code</div>
+        <div class="code-wrapper">
+          <div class="code-topbar">
+            <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code>import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+
+# Load data
+df = pd.read_csv('insurance.csv')
+
+print("="*50)
+print("DATASET LOADED")
+print("="*50)
+print(df.head())
+print(f"\nShape: {df.shape}")
+
+# -----------------------------------------------
+# A. K-Means Clustering
+#    Features: Age and Charges
+#    K = 3 clusters (Low, Mid, High Risk)
+# -----------------------------------------------
+print("\n" + "="*50)
+print("A. K-MEANS CLUSTERING")
+print("="*50)
+
+# Step 1: Feature Selection
+X = df[['age', 'charges']]
+
+# Step 2: Scaling
+# Essential because 'charges' values are much
+# larger than 'age' values
+scaler   = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+print("\nFeatures selected : age, charges")
+print("Scaling applied   : StandardScaler")
+
+# Step 3: Apply K-Means with K=3
+# 3 groups: Young Low-Cost, Older Mid-Cost,
+#           High-Cost/High-Risk
+kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
+df['Cluster'] = kmeans.fit_predict(X_scaled)
+
+print("\nK-Means Clustering Done! (K=3)")
+print("\nFirst 5 records with assigned clusters:")
+print(df[['age', 'charges', 'Cluster']].head())
+
+# Cluster summary
+print("\n" + "="*50)
+print("CLUSTER SUMMARY")
+print("="*50)
+print(df.groupby('Cluster')[['age', 'charges']].mean().round(2))
+
+# -----------------------------------------------
+# B. Plot the Cluster Data
+# -----------------------------------------------
+print("\n" + "="*50)
+print("B. PLOTTING CLUSTERS")
+print("="*50)
+
+plt.figure(figsize=(10, 6))
+
+# Plot data points colored by cluster
+sns.scatterplot(
+    data=df,
+    x='age',
+    y='charges',
+    hue='Cluster',
+    palette='viridis',
+    s=60
+)
+
+# Plot centroids on original scale
+centroids = scaler.inverse_transform(kmeans.cluster_centers_)
+plt.scatter(
+    centroids[:, 0],
+    centroids[:, 1],
+    c='red',
+    marker='X',
+    s=200,
+    label='Centroids'
+)
+
+plt.title('Insurance Clusters (Age vs Charges)')
+plt.xlabel('Age')
+plt.ylabel('Insurance Charges')
+plt.legend()
+plt.tight_layout()
+plt.show()
+
+print("\n" + "="*50)
+print("CONCLUSION: Clustering in Python Complete!")
+print("="*50)</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXP 08 -->
+    <section class="exp-section" id="exp8">
+      <div class="exp-header">
+        <div class="exp-tag">Experiment 08</div>
+        <div class="exp-title">Recommendation System using KNN</div>
+        <div class="exp-desc">K-Nearest Neighbors based insurance plan recommendation using Euclidean distance.</div>
+      </div>
+      <div class="note-box"><strong>Run on:</strong> Google Colab · All libraries pre-installed · No extra installs needed</div>
+      <div class="code-section">
+        <div class="code-label">Full Code</div>
+        <div class="code-wrapper">
+          <div class="code-topbar">
+            <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code>import pandas as pd
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import NearestNeighbors
+
+# Load the dataset
+df = pd.read_csv('insurance.csv')
+
+print("="*50)
+print("DATASET LOADED")
+print("="*50)
+print(df.head())
+print(f"\nShape: {df.shape}")
+
+# -----------------------------------------------
+# Preprocessing
+# Convert categorical columns to numbers
+# -----------------------------------------------
+df['is_smoker'] = df['smoker'].map({'yes': 1, 'no': 0})
+df['is_female'] = df['sex'].map({'female': 1, 'male': 0})
+
+# Features used for finding similar profiles
+features = ['age', 'bmi', 'is_smoker', 'children']
+X = df[features]
+
+# Scale the features
+scaler   = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Build KNN model (K=5, Euclidean distance)
+model = NearestNeighbors(n_neighbors=5, metric='euclidean')
+model.fit(X_scaled)
+
+print("\nKNN Model Trained Successfully!")
+print(f"Features used : {features}")
+print(f"Neighbours    : 5")
+print(f"Metric        : Euclidean Distance")
+
+# -----------------------------------------------
+# Recommendation Function
+# -----------------------------------------------
+def recommend_insurance_profile(age, bmi, smoker_status, children):
+
+    print("\n" + "="*50)
+    print("INSURANCE RECOMMENDATION SYSTEM")
+    print("="*50)
+
+    is_smoker      = 1 if smoker_status.lower() == 'yes' else 0
+    new_user       = pd.DataFrame(
+                        [[age, bmi, is_smoker, children]],
+                        columns=features
+                     )
+    new_user_scaled = scaler.transform(new_user)
+
+    distances, indices = model.kneighbors(new_user_scaled)
+    similar_people     = df.iloc[indices[0]]
+    avg_charges        = similar_people['charges'].mean()
+
+    print(f"\n--- Recommendations for Profile ---")
+    print(f"Age          : {age}")
+    print(f"BMI          : {bmi}")
+    print(f"Smoker       : {smoker_status}")
+    print(f"Children     : {children}")
+
+    print(f"\nTop 5 Similar Profiles Found:")
+    print(similar_people[['age', 'bmi', 'smoker',
+                           'children', 'charges']].to_string())
+
+    print(f"\nSuggested Insurance Budget : ${avg_charges:.2f}")
+
+    if avg_charges > 30000:
+        plan = "Platinum Comprehensive Plan (High Coverage)"
+    elif avg_charges > 15000:
+        plan = "Gold Standard Plan (Moderate Coverage)"
+    else:
+        plan = "Silver Essential Plan (Basic Coverage)"
+
+    print(f"Recommended Plan           : {plan}")
+    print("\nBased on 5 similar profiles found in our database.")
+    print("="*50)
+
+# -----------------------------------------------
+# Test the Recommendation System
+# -----------------------------------------------
+print("\n--- TEST 1 ---")
+recommend_insurance_profile(
+    age=19, bmi=27.9, smoker_status='yes', children=0
+)
+
+print("\n--- TEST 2 ---")
+recommend_insurance_profile(
+    age=28, bmi=33.0, smoker_status='yes', children=0
+)
+
+print("\n--- TEST 3 ---")
+recommend_insurance_profile(
+    age=45, bmi=22.0, smoker_status='no', children=2
+)
+
+print("\n" + "="*50)
+print("CONCLUSION: Recommendation System Complete!")
+print("="*50)</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXP 09 -->
+    <section class="exp-section" id="exp9">
+      <div class="exp-header">
+        <div class="exp-tag">Experiment 09</div>
+        <div class="exp-title">EDA using Apache Spark and Pandas</div>
+        <div class="exp-desc">Hybrid approach — Spark for aggregation, Pandas for final analysis and display.</div>
+      </div>
+      <div class="note-box"><strong>Install first:</strong> <code>!pip install pyspark</code> — PySpark is NOT pre-installed in Colab</div>
+      <div class="code-section">
+        <div class="code-label">Full Code</div>
+        <div class="code-wrapper">
+          <div class="code-topbar">
+            <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code>import pandas as pd
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, avg, count
+
+# -----------------------------------------------
+# Step 1: Create Spark Session
+# -----------------------------------------------
+spark = SparkSession.builder \
+    .appName("InsuranceEDA") \
+    .master("local[*]") \
+    .getOrCreate()
+
+spark.sparkContext.setLogLevel("ERROR")
+
+print("="*50)
+print("SPARK SESSION CREATED SUCCESSFULLY")
+print("="*50)
+
+# -----------------------------------------------
+# Step 2: Load Data into Spark DataFrame
+# -----------------------------------------------
+spark_df = spark.read.csv(
+    'insurance.csv',
+    header=True,
+    inferSchema=True
+)
+
+print("\n--- First 5 Rows ---")
+spark_df.show(5)
+
+# -----------------------------------------------
+# Step 3: Big Data EDA with Spark
+# -----------------------------------------------
+print("\n" + "="*50)
+print("SPARK DATAFRAME SCHEMA")
+print("="*50)
+spark_df.printSchema()
+
+print("\n" + "="*50)
+print("BASIC STATISTICS")
+print("="*50)
+print(f"Total Records : {spark_df.count()}")
+print(f"Total Columns : {len(spark_df.columns)}")
+spark_df.describe().show()
+
+# -----------------------------------------------
+# Step 4: Regional Analysis using Spark
+# -----------------------------------------------
+print("\n" + "="*50)
+print("REGIONAL ANALYSIS (Spark Result)")
+print("="*50)
+
+region_analysis = spark_df.groupBy("region") \
+    .agg(
+        avg("charges").alias("avg_charges"),
+        count("charges").alias("beneficiary_count")
+    ) \
+    .orderBy(col("avg_charges").desc())
+
+print("--- Regional Analysis (Spark Result) ---")
+region_analysis.show()
+
+# -----------------------------------------------
+# Step 5: Convert Spark result to Pandas
+# -----------------------------------------------
+print("\n" + "="*50)
+print("SPARK TO PANDAS CONVERSION")
+print("="*50)
+
+pandas_summary = region_analysis.toPandas()
+
+print("--- Summary in Pandas Format ---")
+print(pandas_summary)
+
+# -----------------------------------------------
+# Step 6: Smoker Analysis using Spark
+# -----------------------------------------------
+print("\n" + "="*50)
+print("SMOKER ANALYSIS BY REGION")
+print("="*50)
+
+smoker_analysis = spark_df.groupBy("region", "smoker") \
+    .agg(count("smoker").alias("count")) \
+    .orderBy("region", "smoker")
+
+smoker_analysis.show()
+
+# -----------------------------------------------
+# Step 7: Stop Spark Session
+# -----------------------------------------------
+spark.stop()
+print("\n" + "="*50)
+print("SPARK SESSION STOPPED")
+print("CONCLUSION: EDA using Apache Spark and Pandas Complete!")
+print("="*50)</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXP 10 -->
+    <section class="exp-section" id="exp10">
+      <div class="exp-header">
+        <div class="exp-tag">Experiment 10</div>
+        <div class="exp-title">Batch and Streamed Data Analysis using Spark</div>
+        <div class="exp-desc">Batch processing on static CSV data and simulated Spark Structured Streaming with micro-batches.</div>
+      </div>
+      <div class="note-box"><strong>Install first:</strong> <code>!pip install pyspark</code> — PySpark is NOT pre-installed in Colab</div>
+      <div class="code-section">
+        <div class="code-label">Full Code</div>
+        <div class="code-wrapper">
+          <div class="code-topbar">
+            <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code>import os
+import time
+import pandas as pd
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import avg
+from pyspark.sql.types import (
+    StructType, StructField,
+    StringType, IntegerType, DoubleType
+)
+
+# -----------------------------------------------
+# Step 1: Initialize Spark Session
+# -----------------------------------------------
+spark = SparkSession.builder \
+    .appName("Experiment10_Batch_Final") \
+    .master("local[*]") \
+    .getOrCreate()
+
+spark.sparkContext.setLogLevel("ERROR")
+
+print("="*50)
+print("SPARK SESSION CREATED SUCCESSFULLY")
+print("="*50)
+
+# -----------------------------------------------
+# Step 2: Define Schema
+# -----------------------------------------------
+schema = StructType([
+    StructField("age",      IntegerType(), True),
+    StructField("sex",      StringType(),  True),
+    StructField("bmi",      DoubleType(),  True),
+    StructField("children", IntegerType(), True),
+    StructField("smoker",   StringType(),  True),
+    StructField("region",   StringType(),  True),
+    StructField("charges",  DoubleType(),  True)
+])
+
+# -----------------------------------------------
+# PART A: BATCH PROCESSING
+# -----------------------------------------------
+print("\n" + "="*50)
+print("PART 1: BATCH PROCESSING")
+print("="*50)
+
+print("\n--- Starting Batch Analysis ---")
+
+batch_df = spark.read.csv(
+    'insurance.csv',
+    header=True,
+    schema=schema
+)
+
+print(f"\nTotal Records Loaded: {batch_df.count()}")
+print("\nFirst 5 rows:")
+batch_df.show(5)
+
+# Batch Analysis 1: Avg charges by smoker status
+print("\n--- Average Charges by Smoker Status ---")
+batch_avg = batch_df.groupBy("smoker") \
+                    .agg(avg("charges"))
+batch_avg.show()
+
+# Batch Analysis 2: Avg charges by region
+print("\n--- Average Charges by Region ---")
+batch_region = batch_df.groupBy("region") \
+                       .agg(avg("charges").alias("avg_charges")) \
+                       .orderBy("avg_charges", ascending=False)
+batch_region.show()
+
+# Batch Analysis 3: Convert to Pandas for summary
+print("\n--- Batch Summary in Pandas Format ---")
+pandas_batch = batch_region.toPandas()
+print(pandas_batch)
+
+# -----------------------------------------------
+# PART B: STREAMED PROCESSING SIMULATION
+# -----------------------------------------------
+print("\n" + "="*50)
+print("PART 2: STRUCTURED STREAMING SIMULATION")
+print("="*50)
+
+print("\nConcept: Structured Streaming treats data")
+print("as an Unbounded Table.")
+print("Logic: .readStream -> .groupBy('region')")
+print("       -> .writeStream\n")
+
+mock_data = [
+    {"Batch": 0, "Region": "southwest", "Count": 325},
+    {"Batch": 1, "Region": "southeast", "Count": 364},
+    {"Batch": 2, "Region": "northwest", "Count": 325},
+    {"Batch": 3, "Region": "northeast", "Count": 324}
+]
+
+print("Simulating real-time aggregation updates...")
+print("-"*40)
+
+for i in range(len(mock_data)):
+    print(f"Streaming Update - Batch {i}")
+    print(f"Processing new arrivals... "
+          f"Count for {mock_data[i]['Region']}: "
+          f"{mock_data[i]['Count']}")
+    time.sleep(1)
+
+print("\n" + "="*40)
+print("All streaming batches processed!")
+print("="*40)
+
+# -----------------------------------------------
+# Step 3: Stop Spark Session
+# -----------------------------------------------
+spark.stop()
+
+print("\n" + "="*50)
+print("SPARK SESSION STOPPED")
+print("CONCLUSION: Batch and Streamed Data")
+print("Analysis using Spark Complete!")
+print("="*50)</code></pre>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  function show(num, btn) {
+    // Hide all sections
+    document.querySelectorAll('.exp-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.exp-btn').forEach(b => b.classList.remove('active'));
+    // Show selected
+    document.getElementById('exp' + num).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  function copyCode(btn) {
+    const pre = btn.closest('.code-wrapper').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
